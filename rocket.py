@@ -2,6 +2,8 @@ import numpy as np
 import random
 import cv2
 import utils
+from matplotlib import animation
+import matplotlib.pyplot as plt
 
 
 class Rocket(object):
@@ -111,7 +113,7 @@ class Rocket(object):
         yc = (self.world_y_max + self.world_y_min) / 2.0
 
         if self.task == 'landing':
-            x = random.uniform(xc - x_range / 4.0, xc + x_range / 4.0)
+            x = random.uniform(xc - x_range / 4.0, xc + x_range / 4.0)  # NOTE(rjy): need rocket's pos at 1/2 center part?
             y = yc + 0.4*y_range
             if x <= 0:
                 theta = -85 / 180 * np.pi
@@ -303,11 +305,22 @@ class Rocket(object):
         self.draw_text(frame_0, color=(0, 0, 0))
         self.draw_text(frame_1, color=(0, 0, 0))
 
-        cv2.imshow(window_name, frame_0[:,:,::-1])
-        cv2.waitKey(wait_time)
-        cv2.imshow(window_name, frame_1[:,:,::-1])
-        cv2.waitKey(wait_time)
+        # cv2.imshow(window_name, frame_0[:,:,::-1])
+        # cv2.waitKey(wait_time)
+        # cv2.imshow(window_name, frame_1[:,:,::-1])
+        # cv2.waitKey(wait_time)
         return frame_0, frame_1
+
+    @staticmethod
+    def display_frames_as_gif(frames: list, path: str) -> None:
+        patch = plt.imshow(frames[0])
+        plt.axis('off')
+
+        def animate(i):
+            patch.set_data(frames[i])
+
+        anim = animation.FuncAnimation(plt.gcf(), animate, frames=len(frames), interval=5)
+        anim.save(path, writer='imagemagick', fps=20)
 
     def create_polygons(self):
 
