@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import utils
 import os
 import glob
+import imageio
 
 # Decide which device we want to run on
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -14,7 +15,7 @@ if __name__ == '__main__':
 
     task = 'hover'  # 'hover' or 'landing'
 
-    max_m_episode = 800000
+    max_m_episode = 100
     max_steps = 800
 
     env = Rocket(task=task, max_steps=max_steps)
@@ -33,6 +34,7 @@ if __name__ == '__main__':
         last_episode_id = checkpoint['episode_id']
         REWARDS = checkpoint['REWARDS']
 
+    my_frames = []
     for episode_id in range(last_episode_id, max_m_episode):
 
         # training loop
@@ -46,7 +48,7 @@ if __name__ == '__main__':
             values.append(value)
             masks.append(1-done)
             if episode_id % 100 == 1:
-                env.render()
+                my_frames.extend(env.render())
 
             if done or step_id == max_steps-1:
                 _, _, Qval = net.get_action(state)
@@ -70,6 +72,7 @@ if __name__ == '__main__':
                         'REWARDS': REWARDS,
                         'model_G_state_dict': net.state_dict()},
                        os.path.join(ckpt_folder, 'ckpt_' + str(episode_id).zfill(8) + '.pt'))
-
+    
+    imageio.mimsave('test.gif', my_frames, fps=20)
 
 

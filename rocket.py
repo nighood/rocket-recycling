@@ -1,7 +1,7 @@
 import numpy as np
 import random
 import cv2
-import utils
+from . import utils
 from matplotlib import animation
 import matplotlib.pyplot as plt
 
@@ -34,6 +34,7 @@ class Rocket(object):
 
         self.task = task
         self.rocket_type = rocket_type
+        self._seed = 0      # default seed
 
         self.g = 9.8
         self.H = 50  # rocket height (meters)
@@ -87,6 +88,9 @@ class Rocket(object):
         cv2.destroyAllWindows()
         return self.flatten(self.state)
 
+    def seed(self, seed):
+        self._seed = seed
+
     def create_action_table(self):
         f0 = 0.2 * self.g  # thrust
         f1 = 1.0 * self.g
@@ -102,6 +106,7 @@ class Rocket(object):
         return action_table
 
     def get_random_action(self):
+        random.seed(self._seed)
         return random.randint(0, len(self.action_table)-1)
 
     def create_random_state(self):
@@ -113,6 +118,7 @@ class Rocket(object):
         yc = (self.world_y_max + self.world_y_min) / 2.0
 
         if self.task == 'landing':
+            random.seed(self._seed)
             x = random.uniform(xc - x_range / 4.0, xc + x_range / 4.0)  # NOTE(rjy): need rocket's pos at 1/2 center part?
             y = yc + 0.4*y_range
             if x <= 0:
@@ -124,6 +130,7 @@ class Rocket(object):
         if self.task == 'hover':
             x = xc
             y = yc + 0.2 * y_range
+            random.seed(self._seed)
             theta = random.uniform(-45, 45) / 180 * np.pi
             vy = -10
 
@@ -309,7 +316,7 @@ class Rocket(object):
         # cv2.waitKey(wait_time)
         # cv2.imshow(window_name, frame_1[:,:,::-1])
         # cv2.waitKey(wait_time)
-        return frame_0, frame_1
+        return [frame_0, frame_1]
 
     @staticmethod
     def display_frames_as_gif(frames: list, path: str) -> None:
