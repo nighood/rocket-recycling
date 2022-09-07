@@ -591,3 +591,5 @@ class Rocket(object):
         vis = cv2.resize(vis, (self.viewport_w, self.viewport_h))
         return vis
 
+    def close(self):
+        pass
